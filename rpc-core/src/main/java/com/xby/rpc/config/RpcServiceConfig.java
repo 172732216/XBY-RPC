@@ -21,7 +21,7 @@ public class RpcServiceConfig {
         this.service = service;
     }
 
-    public List<String> rpcServiceName(){
+    public List<String> rpcServiceNames(){
         return interfaceNames().stream()
                 .map(interfaceName->interfaceName+getVersion()+getGroup())
                 .collect(Collectors.toList());

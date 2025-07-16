@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>com.xby</groupId>
-            <artifactId>test-api</artifactId>
+            <artifactId>rpc-core</artifactId>
         </dependency>
     </dependencies>
 

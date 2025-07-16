@@ -13,5 +13,11 @@ public enum RpcRespStatus {
     private final int code;
     private final String msg;
 
+    public static boolean isSuccessful(Integer code) {
+        return SUCCESS.code == code;
+    }
+    public static boolean isFailed(Integer code) {
+        return !isSuccessful(code);
+    }
 
 }
