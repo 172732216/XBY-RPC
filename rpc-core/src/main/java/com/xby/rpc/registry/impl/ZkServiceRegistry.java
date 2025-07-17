@@ -6,8 +6,10 @@ import com.xby.rpc.factory.SingletonFactory;
 import com.xby.rpc.registry.ServiceRegistry;
 import com.xby.rpc.registry.zk.ZkClient;
 import com.xby.rpc.util.IPUtils;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 @Slf4j
@@ -28,5 +30,11 @@ public class ZkServiceRegistry implements ServiceRegistry {
         zkClient.createPersistentNode(path);
     }
 
-
+    @SneakyThrows
+    @Override
+    public void clearAll() {
+        String host = InetAddress.getLocalHost().getHostAddress();
+        int serverPort=RpcConstant.SERVER_PORT;
+        zkClient.clearAll(new InetSocketAddress(host,serverPort));
+    }
 }

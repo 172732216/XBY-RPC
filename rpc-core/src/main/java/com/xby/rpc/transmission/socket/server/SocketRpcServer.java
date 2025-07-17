@@ -8,6 +8,7 @@ import com.xby.rpc.provider.ServiceProvider;
 import com.xby.rpc.provider.impl.SimpleServiceProvider;
 import com.xby.rpc.provider.impl.ZkServiceProvider;
 import com.xby.rpc.transmission.RpcService;
+import com.xby.rpc.util.ShutdownHookUtils;
 import com.xby.rpc.util.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +39,7 @@ public class SocketRpcServer implements RpcService {
 
     @Override
     public void start() {
+        ShutdownHookUtils.clearAll();
         try(ServerSocket serverSocket=new ServerSocket(8888)){
             log.info("服务启动，端口: {}", port);
             Socket socket;
