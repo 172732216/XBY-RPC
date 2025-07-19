@@ -5,9 +5,8 @@ import com.xby.rpc.constant.RpcConstant;
 import com.xby.rpc.factory.SingletonFactory;
 import com.xby.rpc.handle.RpcReqHander;
 import com.xby.rpc.provider.ServiceProvider;
-import com.xby.rpc.provider.impl.SimpleServiceProvider;
 import com.xby.rpc.provider.impl.ZkServiceProvider;
-import com.xby.rpc.transmission.RpcService;
+import com.xby.rpc.transmission.RpcServer;
 import com.xby.rpc.util.ShutdownHookUtils;
 import com.xby.rpc.util.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
-public class SocketRpcServer implements RpcService {
+public class SocketRpcServer implements RpcServer {
     private final int port;
     private final ServiceProvider serviceProvider;
     private final RpcReqHander rpcReqHander;

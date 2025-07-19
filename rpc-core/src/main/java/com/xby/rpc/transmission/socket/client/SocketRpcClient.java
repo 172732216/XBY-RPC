@@ -1,13 +1,11 @@
 package com.xby.rpc.transmission.socket.client;
 
-import cn.hutool.core.lang.Singleton;
 import com.xby.rpc.dto.RpcReq;
 import com.xby.rpc.dto.RpcResp;
 import com.xby.rpc.factory.SingletonFactory;
 import com.xby.rpc.registry.ServiceDiscovery;
 import com.xby.rpc.registry.impl.ZkServiceDiscovery;
 import com.xby.rpc.transmission.RpcClient;
-import com.xby.rpc.transmission.RpcService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ObjectInputStream;

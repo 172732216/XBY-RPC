@@ -7,7 +7,6 @@ import com.xby.rpc.dto.RpcResp;
 import com.xby.rpc.enums.RpcRespStatus;
 import com.xby.rpc.exception.RpcException;
 import com.xby.rpc.transmission.RpcClient;
-import com.xby.rpc.transmission.RpcService;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
