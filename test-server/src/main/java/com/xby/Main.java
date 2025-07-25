@@ -8,13 +8,15 @@ import com.xby.server.UserServiceImpl;
 
 public class Main {
     public static void main(String[] args) {
-//        RpcServiceConfig config = new RpcServiceConfig(new UserServiceImpl());
+        RpcServiceConfig config = new RpcServiceConfig(new UserServiceImpl());
 //
 //        RpcServer rpcService=new SocketRpcServer();
 //        rpcService.publishService(config);
 //
 //        rpcService.start();
-        NettyRpcServer rpcServer = new NettyRpcServer();
+        RpcServer rpcServer = new NettyRpcServer();
+        rpcServer.publishService(config);
+
         rpcServer.start();
 
 

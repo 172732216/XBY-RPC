@@ -25,6 +25,8 @@
         <netty.version>4.1.77.Final</netty.version>
         <curator.version>4.2.0</curator.version>
         <kryo.version>4.0.2</kryo.version>
+        <hessian.version>4.0.65</hessian.version>
+        <guava-retrying.version>2.0.0</guava-retrying.version>
     </properties>
 
     <dependencies>
@@ -83,6 +85,16 @@
                 <groupId>com.esotericsoftware</groupId>
                 <artifactId>kryo</artifactId>
                 <version>${kryo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.rholder</groupId>
+                <artifactId>guava-retrying</artifactId>
+                <version>${guava-retrying.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hessian.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

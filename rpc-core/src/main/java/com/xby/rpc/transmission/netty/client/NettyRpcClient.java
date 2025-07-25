@@ -1,8 +1,16 @@
 package com.xby.rpc.transmission.netty.client;
 
 import com.xby.rpc.constant.RpcConstant;
+import com.xby.rpc.dto.RpcMsg;
 import com.xby.rpc.dto.RpcReq;
 import com.xby.rpc.dto.RpcResp;
+import com.xby.rpc.enums.CompressType;
+import com.xby.rpc.enums.MsgType;
+import com.xby.rpc.enums.SerializeType;
+import com.xby.rpc.enums.VersionType;
+import com.xby.rpc.factory.SingletonFactory;
+import com.xby.rpc.registry.ServiceDiscovery;
+import com.xby.rpc.registry.impl.ZkServiceDiscovery;
 import com.xby.rpc.transmission.RpcClient;
 import com.xby.rpc.transmission.netty.codec.NettyRpcDecoder;
 import com.xby.rpc.transmission.netty.codec.NettyRpcEncoder;
@@ -15,14 +23,32 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class NettyRpcClient implements RpcClient {
     private static final Bootstrap bootstrap;
     private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
+    private final ChannelPool channelPool;
+    private final ServiceDiscovery serviceDiscovery;
+
+    public NettyRpcClient() {
+        this(SingletonFactory.getInstance(ZkServiceDiscovery.class));
+    }
+
+    public NettyRpcClient(ServiceDiscovery serviceDiscovery) {
+        this.channelPool = SingletonFactory.getInstance(ChannelPool.class);
+        this.serviceDiscovery = serviceDiscovery;
+    }
 
     static {
         bootstrap = new Bootstrap();
@@ -32,6 +58,7 @@ public class NettyRpcClient implements RpcClient {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, DEFAULT_CONNECT_TIMEOUT)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     protected void initChannel(SocketChannel channel) throws Exception {
+                        channel.pipeline().addLast(new IdleStateHandler(0,5,0, TimeUnit.SECONDS));
                         channel.pipeline().addLast(new NettyRpcDecoder());
                         channel.pipeline().addLast(new NettyRpcEncoder());
                         channel.pipeline().addLast(new NettyRpcClientHandler());
@@ -40,23 +67,45 @@ public class NettyRpcClient implements RpcClient {
 
 
     }
+
+
     @SneakyThrows
     @Override
-    public RpcResp<?> sendReq(RpcReq req) {
-        ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", RpcConstant.SERVER_PORT).sync();
+    public Future<RpcResp<?>> sendReq(RpcReq req) {
+        CompletableFuture<RpcResp<?>> cf = new CompletableFuture<>();
+        UnprocessedRpcReq.put(req.getReqId(),cf);
 
-        log.info("netty rpc client连接到xxx");
+        InetSocketAddress address=serviceDiscovery.lookupService(req);
 
-        Channel channel = channelFuture.channel();
-        String interfaceName = req.getInterfaceName();
-        channel.writeAndFlush(interfaceName).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        Channel channel = channelPool.get(address,()->connect(address));
 
-        channel.closeFuture().sync();
+        log.info("netty rpc client连接到:{}",address);
 
-        AttributeKey<String>key = AttributeKey.valueOf(RpcConstant.NETTY_RPC_KEY);
+        RpcMsg rpcMsg = RpcMsg.builder()
+                .version(VersionType.VERSION1)
+                .serializeType(SerializeType.KRYO)
+                .compressType(CompressType.GZIP)
+                .msgType(MsgType.RPC_REQ)
+                .data(req)
+                .build();
 
-        String s=channel.attr(key).get();
-        System.out.println(s);
-        return null;
+        channel.writeAndFlush(rpcMsg).addListener((ChannelFutureListener)listener->{
+            if(!listener.isSuccess()){
+                listener.channel().close();
+                cf.completeExceptionally(listener.cause());
+            }
+        });
+
+
+        return cf;
+    }
+
+    private Channel connect(InetSocketAddress address) {
+        try {
+            return bootstrap.connect(address).sync().channel();
+        } catch (InterruptedException e) {
+            log.error("连接到远程服务器失败", e);
+            throw new RuntimeException(e);
+        }
     }
 }
