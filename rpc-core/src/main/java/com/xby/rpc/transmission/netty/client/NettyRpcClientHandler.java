@@ -25,7 +25,6 @@ public class NettyRpcClientHandler extends SimpleChannelInboundHandler<RpcMsg> {
         }
 
         log.debug("收到服务端数据:{}",rpcMsg);
-
         RpcResp<?> rpcResp=(RpcResp<?>)rpcMsg.getData();
 
         UnprocessedRpcReq.complete(rpcResp);

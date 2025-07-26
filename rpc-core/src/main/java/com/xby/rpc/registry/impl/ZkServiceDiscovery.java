@@ -32,7 +32,7 @@ public class ZkServiceDiscovery implements ServiceDiscovery {
         String path= RpcConstant.ZK_RPC_ROOT_PATH+ StrUtil.SLASH+rpcReq.rpcServiceName();
 
         List<String> children=zkClient.getChildrenNode(path);
-        String address = loadBalance.select(children);
+        String address = loadBalance.select(children,rpcReq);
 
         return IPUtils.toInetSocketAddress(address);
     }

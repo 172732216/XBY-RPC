@@ -1,15 +1,18 @@
 package com.xby.rpc.loadbalance.impl;
 
-import cn.hutool.core.util.RandomUtil;
 import com.xby.rpc.dto.RpcReq;
 import com.xby.rpc.loadbalance.LoadBalance;
 
 import java.util.List;
 
-public class RandomLoadBalance implements LoadBalance {
+public class RoundLoadBalance implements LoadBalance {
+    private int last=-1;
+
     @Override
     public String select(List<String>list, RpcReq rpcReq) {
+        last++;
+        last=last%list.size();
 
-        return RandomUtil.randomEle(list);
+        return list.get(last);
     }
 }
